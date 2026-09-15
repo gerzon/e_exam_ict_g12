@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICT GRADE 12 ONLINE EXAMINATION</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://oqwehqvhhdvxjxugdukh.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9xd2VocXZoaGR2eGp4dWdkdWtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2NTk3MzEsImV4cCI6MjEwMzIzNTczMX0.SidafkMBgTFj9wqqk8nuIYMNbfUpaYVa5WBJUvnYUl4";
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+</script>
+
+<style>
+  :root{
+    --sti-blue:#003b7a;
+    --sti-blue-dark:#002b5c;
+    --sti-yellow:#ffc400;
+    --light:#f4f7fb;
+    --text:#1f2937;
+    --border:#d9e1ec;
+    --success:#16803c;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
+    background:var(--light);
+    color:var(--text);
+    line-height:1.5;
+  }
+  .topbar{height:9px;background:var(--sti-yellow)}
+  header{
+    background:linear-gradient(135deg,var(--sti-blue-dark),var(--sti-blue));
+    color:#fff;padding:28px 20px;
+    box-shadow:0 3px 12px rgba(0,0,0,.15);
+  }
+  .header-inner{max-width:1000px;margin:auto}
+  .header-row{display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{font-weight:800;letter-spacing:.5px;color:var(--sti-yellow);font-size:18px}
+  .dashboard-link{display:inline-block;background:var(--sti-yellow);color:var(--sti-blue-dark);padding:9px 13px;border-radius:7px;font-size:13px;font-weight:700;text-decoration:none}
+  .dashboard-link:hover{filter:brightness(.95)}
+  h1{margin:7px 0 4px;font-size:28px}
+  .subtitle{margin:0;color:#e9f1ff}
+  .container{max-width:1000px;margin:24px auto;padding:0 15px}
+  .subject-tabs{
+    max-width:1000px;margin:22px auto 0;padding:0 15px;display:flex;gap:10px;flex-wrap:wrap
+  }
+  .tab-button{
+    flex:1 1 180px;border:1px solid var(--border);background:#fff;color:var(--sti-blue-dark);
+    border-radius:10px 10px 0 0;padding:12px 18px;font-weight:700;cursor:pointer;
+    box-shadow:0 -2px 8px rgba(0,0,0,.03)
+  }
+  .tab-button.active{
+    background:var(--sti-blue);color:#fff;border-color:var(--sti-blue);box-shadow:none
+  }
+  .tab-panel{display:none}
+  .tab-panel.active{display:block}
+  .card{
+    background:#fff;border:1px solid var(--border);border-radius:12px;
+    padding:22px;margin-bottom:18px;box-shadow:0 3px 12px rgba(0,0,0,.05)
+  }
+  .section-title{
+    background:var(--sti-blue);color:#fff;padding:12px 15px;border-radius:8px;
+    margin:-22px -22px 20px;font-size:18px;font-weight:700;
+    border-bottom:4px solid var(--sti-yellow)
+  }
+  .meta{display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px}
+  label{font-weight:700;font-size:14px}
+  input[type=text], input[type=date], textarea{
+    width:100%;margin-top:6px;border:1px solid #bcc8d8;border-radius:7px;
+    padding:11px;font:inherit;background:#fff
+  }
+  .instructions{background:#fff8d9;border-left:5px solid var(--sti-yellow);padding:13px 15px;border-radius:6px}
+  .grading-scale{width:100%;margin-top:14px;border-collapse:collapse;background:#fff}
+  .grading-scale th,.grading-scale td{padding:9px 11px;border:1px solid #e2c75b;text-align:left}
+  .grading-scale th{background:var(--sti-blue);color:#fff}
+  .grading-scale tr:nth-child(even){background:#fffdf0}
+  .question{padding:18px 0;border-bottom:1px solid #e6ebf2}
+  .question:last-child{border-bottom:0}
+  .qtext{font-weight:700;margin-bottom:11px}
+  .option{
+    display:block;padding:9px 11px;margin:6px 0;border:1px solid transparent;
+    border-radius:7px;cursor:pointer
+  }
+  .option:hover{background:#eef5ff;border-color:#c7d9f2}
+  .option input{margin-right:9px}
+  .essay textarea{min-height:150px;resize:vertical}
+  .points{font-size:12px;color:#667085;font-weight:normal}
+  .actions{display:flex;gap:10px;flex-wrap:wrap}
+  button{
+    border:0;border-radius:8px;padding:13px 20px;font-weight:700;cursor:pointer;
+    font-size:15px
+  }
+  .submit{background:var(--sti-blue);color:#fff}
+  .reset{background:#e9eef5;color:#253247}
+  button:hover{opacity:.92}
+  #result{
+    display:none;position:fixed;inset:0;z-index:10;overflow-y:auto;
+    margin:0;padding:28px 15px;background:rgba(0,43,92,.55)
+  }
+  .result-dialog{
+    max-width:1000px;margin:auto;background:#fff;border:1px solid var(--border);
+    border-radius:12px;padding:22px;box-shadow:0 12px 35px rgba(0,0,0,.25)
+  }
+  .result-close{float:right;background:#e9eef5;color:#253247;padding:8px 13px}
+  .score{
+    font-size:30px;font-weight:800;color:var(--sti-blue);margin:5px 0
+  }
+  .success{color:var(--success);font-weight:700}
+  .warning{color:#8a5a00}
+  .review{margin-top:15px}
+  .wrong{background:#fff0f0;border-left:4px solid #c62828;padding:9px;margin:5px 0}
+  .correct{background:#eefaf1;border-left:4px solid var(--success);padding:9px;margin:5px 0}
+  .option.answer-correct{background:#eefaf1;border-color:var(--success)}
+  .option.answer-wrong{background:#fff0f0;border-color:#c62828}
+  .loadingScreen{
+    position:fixed;inset:0;z-index:30;display:grid;place-items:center;
+    padding:20px;background:var(--sti-blue-dark);color:#fff
+  }
+  .loading-dialog{text-align:center}
+  .loading-spinner{
+    width:76px;height:76px;margin:0 auto 18px;border:8px solid rgba(255,255,255,.28);
+    border-top-color:var(--sti-yellow);border-radius:50%;animation:spin 1s linear infinite
+  }
+  .loading-dialog p{margin:0;font-weight:700}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  #submissionLoading{display:none;z-index:40}
+  #welcomeScreen{
+    position:fixed;inset:0;z-index:20;display:none;place-items:center;
+    padding:20px;background:rgba(0,43,92,.92);color:#fff
+  }
+  #fullscreenScreen{
+    position:fixed;inset:0;z-index:50;display:none;place-items:center;
+    padding:20px;background:rgba(0,43,92,.96);color:#fff
+  }
+  #pageLeaveScreen{
+    position:fixed;inset:0;z-index:60;display:none;place-items:center;
+    padding:20px;background:rgba(0,43,92,.98);color:#fff
+  }
+  .welcome-dialog{
+    width:min(560px,100%);text-align:center;background:#fff;color:var(--text);
+    border-top:7px solid var(--sti-yellow);border-radius:12px;padding:34px 28px;
+    box-shadow:0 12px 35px rgba(0,0,0,.28)
+  }
+  .welcome-dialog h2{margin:0 0 8px;color:var(--sti-blue);font-size:27px}
+  .welcome-dialog p{margin:8px 0 22px}
+  .welcome-dialog button{background:var(--sti-blue);color:#fff}
+  .loading-message{color:#667085;font-size:14px}
+  footer{text-align:center;padding:25px;color:#667085;font-size:13px}
+  @media(max-width:700px){
+    .header-row{align-items:flex-start;flex-direction:column;gap:10px}
+    .meta{grid-template-columns:1fr}
+    h1{font-size:22px}
+    .card{padding:16px}
+    .section-title{margin:-16px -16px 16px}
+  }
+  @media print{
+    .actions,#result{display:none!important}
+    body{background:#fff}
+    .card{box-shadow:none}
+  }
+</style>
+</head>
+<body>
+<div class="topbar"></div>
+<section id="loadingScreen" class="loadingScreen" role="status" aria-live="polite">
+  <div class="loading-dialog">
+    <div class="loading-spinner" aria-hidden="true"></div>
+    <p>Loading examination...</p>
+  </div>
+</section>
+<section id="submissionLoading" class="loadingScreen" role="status" aria-live="polite">
+  <div class="loading-dialog">
+    <div class="loading-spinner" aria-hidden="true"></div>
+    <p>Submitting your examination...</p>
+  </div>
+</section>
+<section id="welcomeScreen" role="dialog" aria-modal="true" aria-labelledby="welcomeTitle">
+  <div class="welcome-dialog">
+    <h2 id="welcomeTitle">Welcome to the Examination</h2>
+    <p class="loading-message" id="loadingMessage">Preparing your randomized multiple-choice questions...</p>
+    <button id="startExam" type="button" disabled>Loading...</button>
+  </div>
+</section>
+<section id="fullscreenScreen" role="dialog" aria-modal="true" aria-labelledby="fullscreenTitle">
+  <div class="welcome-dialog">
+    <h2 id="fullscreenTitle">Fullscreen Required</h2>
+    <p class="loading-message">The examination is paused because fullscreen mode was exited. Return to fullscreen to continue.</p>
+    <button id="returnFullscreen" type="button">Return to Fullscreen</button>
+  </div>
+</section>
+<section id="pageLeaveScreen" role="dialog" aria-modal="true" aria-labelledby="pageLeaveTitle">
+  <div class="welcome-dialog">
+    <h2 id="pageLeaveTitle">Examination Paused</h2>
+    <p class="loading-message">You left the examination page or minimized the window. Return to this page and fullscreen mode to continue.</p>
+    <button id="returnPage" type="button">Return to Examination</button>
+  </div>
+</section>
+<header>
+  <div class="header-inner">
+    <div class="header-row"><div class="brand">STI COLLEGE</div><a class="dashboard-link" href="admin_dashboard.html">Admin Dashboard</a></div>
+    <h1>ICT GRADE 12 ONLINE EXAMINATION</h1>
+    <p class="subtitle">C# & JAVASCRIPT Fundamentals, Control Structures, Methods, Object-Oriented Programming and File Handling</p>
+  </div>
+</header>
+
+<div class="subject-tabs" role="tablist" aria-label="Examination subjects">
+  <button class="tab-button active" type="button" data-tab="ict" role="tab" aria-selected="true" aria-controls="ict-panel" id="tab-ict">Computer Programming 4 (C SHARP)</button>
+  <button class="tab-button" type="button" data-tab="math" role="tab" aria-selected="false" aria-controls="math-panel" id="tab-math">Computer Programming 5 (JavaScript)</button>
+</div>
+
+<main class="container">
+  <div id="ict-panel" class="tab-panel active" role="tabpanel" aria-labelledby="tab-ict">
+    <form id="examForm">
+      <section class="card">
+        <div class="section-title">Student Information</div>
+        <div class="meta">
+          <div><label for="name">Name</label><input id="name" type="text" placeholder="Enter your full name" required></div>
+          <div><label for="section">Section</label><input id="section" type="text" placeholder="Section" value="TVL-ICT 2101 (C Sharp)" disabled></div>
+          <div><label for="date">Date</label><input id="date" type="date" required></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-title">Instructions</div>
+        <div class="instructions">
+          <strong>Multiple Choice:</strong> Choose the best answer. 60 items × 2 points = 120 points.<br>
+          <strong>Total:</strong> 120 points.
+          <table class="grading-scale" aria-label="Personal grading scale">
+            <thead>
+              <tr><th>Score</th><th>Recording</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>108 - 120</td><td>Will be recorded as 100 points</td></tr>
+              <tr><td>84 - 107</td><td>Actual score</td></tr>
+              <tr><td>83 &amp; below</td><td>Will be recorded as zero points</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-title">Multiple Choice <span class="points">(60 items × 2 points = 120 points)</span></div>
+        <div id="mcqContainer"></div>
+      </section>
+
+      <section class="card">
+        <div class="actions">
+          <button id="submitButton" class="submit" type="submit">Submit Examination</button>
+          <button class="reset" type="button" onclick="resetExam()">Reset Answers</button>
+        </div>
+      </section>
+    </form>
+
+    <section id="result" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+      <div class="result-dialog">
+        <button class="result-close" type="button" onclick="closeResult()" aria-label="Close examination result">Close</button>
+        <div id="resultTitle" class="section-title">Examination Result</div>
+        <div id="resultText"></div>
+        <div id="review" class="review"></div>
+      </div>
+    </section>
+  </div>
+
+  <div id="math-panel" class="tab-panel" role="tabpanel" aria-labelledby="tab-math" hidden>
+    <form id="mathExamForm">
+      <section class="card">
+        <div class="section-title">Student Information</div>
+        <div class="meta">
+          <div><label for="mathName">Name</label><input id="mathName" type="text" placeholder="Enter your full name" required></div>
+          <div><label for="mathSection">Section</label><input id="mathSection" type="text" placeholder="Section" value="TVL-ICT 2101 (JavaScript)" disabled></div>
+          <div><label for="mathDate">Date</label><input id="mathDate" type="date" required></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-title">Instructions</div>
+        <div class="instructions">
+          <strong>Multiple Choice:</strong> Choose the best answer. 60 items × 2 points = 120 points.<br>
+          <strong>Total:</strong> 120 points.
+          <table class="grading-scale" aria-label="JavaScript grading scale">
+            <thead>
+              <tr><th>Score</th><th>Recording</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>108 - 120</td><td>Will be recorded as 100 points</td></tr>
+              <tr><td>84 - 107</td><td>Actual score</td></tr>
+              <tr><td>83 &amp; below</td><td>Will be recorded as zero points</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-title">Multiple Choice <span class="points">(60 items × 2 points = 120 points)</span></div>
+        <div id="mathMcqContainer"></div>
+      </section>
+
+      <section class="card">
+        <div class="actions">
+          <button id="mathSubmitButton" class="submit" type="submit">Submit Examination</button>
+          <button class="reset" type="button" onclick="resetMathExam()">Reset Answers</button>
+        </div>
+      </section>
+    </form>
+
+    <section id="mathResult" role="dialog" aria-modal="true" aria-labelledby="mathResultTitle" style="display:none;position:fixed;inset:0;z-index:10;overflow-y:auto;margin:0;padding:28px 15px;background:rgba(0,43,92,.55)">
+      <div class="result-dialog">
+        <button class="result-close" type="button" onclick="closeResult('mathResult')" aria-label="Close mathematics result">Close</button>
+        <div id="mathResultTitle" class="section-title">Examination Result</div>
+        <div id="mathResultText"></div>
+        <div id="mathReview" class="review"></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>Computer Programming 4 • C# Fundamentals and Object-Oriented Programming | Computer Programming 5 • JavaScript, jQuery &amp; DOM</footer>
+
+<script>
+const questions = [
+["Which component of the .NET Framework manages code execution and provides core services like memory management?",["Class Library","Common Language Runtime (CLR)","Application Framework","Visual Studio IDE"],"B","The CLR manages execution and core runtime services."],
+["Which character is allowed as the starting character of a C# identifier besides letters?",["Hyphen (-)","Dollar sign ($)","Underscore (_)","Ampersand (&)"],"C","An underscore may begin a C# identifier."],
+["Which method prints text to the console and automatically moves the cursor to the next line?",["Console.Write()","Console.Read()","Console.WriteLine()","Console.OutputLine()"],"C","Console.WriteLine prints text followed by a line break."],
+["Which conversion method in .NET converts a string input specifically into a 32-bit integer?",["Convert.ToInt16","Convert.ToInt32","Convert.ToInt64","Convert.ToDouble"],"B","Convert.ToInt32 converts a value to a 32-bit integer."],
+["What requirement must be met when declaring an implicitly-typed variable using the var keyword?",["It must be declared as static.","It must be a global variable.","It must be initialized with a value upon declaration.","It must be placed inside a struct."],"C","A var variable requires an initializer so its type can be inferred."],
+["Which modifier is used to declare a variable whose value cannot be changed after initial assignment?",["static","readonly","const","fixed"],"C","The const modifier declares a compile-time constant."],
+["What is the operator priority (precedence rank) assigned to addition (+) and subtraction (-)?",["Priority 1","Priority 2","Priority 3","Priority 4"],"B","Addition and subtraction share the stated priority rank 2."],
+["Which group of operators holds the highest precedence rank among arithmetic operators?",["Addition (+), Subtraction (-)","Multiplication (*), Division (/), Modulus (%)","Assignment (=, +=)","Relational operators (>, <)"],"B","Multiplication, division, and modulus precede addition and subtraction."],
+["What is the result of the expression 14 % 4 in C#?",["3","2","3.5","0"],"B","The remainder when 14 is divided by 4 is 2."],
+["Which relational operator checks if two values are equal?",["=","==","!=","<="],"B","The equality operator is ==."],
+["What happens if a break statement is omitted from a matching case block inside a switch statement?",["A runtime exception is thrown immediately.","Execution falls through to all subsequent case statements.","The program terminates automatically.","The program loops infinitely."],"B","Without break, execution can fall through subsequent case labels."],
+["Which optional case inside a switch statement is executed when no other case label matches?",["else","final","default","break"],"C","The default label handles unmatched switch values."],
+["How many times is a do-while loop guaranteed to execute its code block?",["Zero times","At least one time","Exactly two times","Indefinitely until user cancels"],"B","A do-while checks its condition after the first execution."],
+["What is the fundamental difference between break and continue statements in loop bodies?",["break pauses the loop; continue restarts the program.","break terminates the loop entirely; continue skips only the current iteration.","continue exits the loop; break repeats the iteration.","Both statements perform identical operations."],"B","break exits the loop, while continue advances to the next iteration."],
+["Which logical operator returns true if and only if ALL operands evaluate to true?",["||","&&","!","^"],"B","The logical AND operator requires all operands to be true."],
+["In the conditional expression expr1 ? expr2 : expr3, which expression is evaluated if expr1 is false?",["expr1","expr2","expr3","Both expr2 and expr3"],"C","The false branch is expr3."],
+["Which advantage of using methods allows modifications to be isolated so they do not affect other program parts?",["Recursion","Input Versatility","Modifiability","Overloading"],"C","Methods support modifiability by isolating changes."],
+["How are named arguments passed to a method call statement?",["Using position index numbers","Using parameter name followed by a colon : and the value","Using ampersands & before each variable","Enclosing values inside curly braces {}"],"B","Named arguments use the parameter name followed by a colon."],
+["Which method of passing arguments copies an argument's memory address into the parameter using the ref keyword?",["By value","By reference","By output","By constant"],"B","The ref keyword passes an argument by reference."],
+["What is method overloading in C#?",["Calling a method recursively until an exception occurs","Declaring multiple methods with the same name but different parameters","Inheriting a method from a derived class into a base class","Overriding a virtual method in an abstract class"],"B","Overloading uses the same method name with different parameter signatures."],
+["In recursive methods, what contains the base case that prevents infinite recursive calls?",["Recursive step","Exit condition","Constructor method","Destructor block"],"B","The exit condition defines the base case."],
+["Where are value types stored in memory during runtime execution?",["Heap","Stack","Disk storage","External cache"],"B","Value types are generally stored on the stack when local."],
+["When a reference type object is instantiated, what is stored directly on the stack?",["The complete object contents","The heap memory address of the object","The source code definition","The compiler instructions"],"B","The stack holds a reference to the object on the heap."],
+["Which access modifier restricts member access solely to its containing class and derived classes?",["public","private","protected","internal"],"C","protected permits access in the containing and derived classes."],
+["Which characteristic is true regarding constructor methods in C#?",["They have a return type of void.","They have exactly the same name as their parent class.","They are declared using the destruct keyword.","They cannot accept parameters."],"B","A constructor has the same name as its class and no return type."],
+["What are the two special accessors that can be defined within property declarations?",["read and write","get and set","push and pop","load and store"],"B","C# properties commonly define get and set accessors."],
+["Which indexing rule do arrays follow in C#?",["One-indexing (starts at 1)","Zero-indexing (starts at 0)","Dynamic indexing (starts at user choice)","Negative indexing (starts at -1)"],"B","C# array indexes begin at zero."],
+["Which loop statement provides a concise way to iterate through all items in an array without using an explicit counter variable?",["while","do-while","foreach","for-in"],"C","foreach iterates through each item without an explicit counter."],
+["Which array property returns the total number of elements contained in an array?",["Rank","Length","Size","Count"],"B","The Length property returns the number of array elements."],
+["Which String property-method inserts a value into a string starting at a specified index position?",["Insert(index, value)","Concat(index, value)","Append(index, value)","Substring(index, value)"],"A","String.Insert adds text at the specified index."],
+["Which String property-method returns a Boolean value true if a string contains a specified target value?",["IndexOf(value)","Contains(value)","HasValue(value)","Matches(value)"],"B","String.Contains returns whether the target occurs."],
+["What term is used for a parent class whose members and features are inherited by a derived class?",["Superclass","Base class","Abstract interface","Concrete class"],"B","The inherited parent is called the base class."],
+["Which access modifier prevents a class from being inherited by any other class?",["static","sealed","abstract","private"],"B","A sealed class cannot be inherited."],
+["What symbol prefixes the class identifier when declaring a destructor method in C#?",["Exclamation mark (!)","Tilde (~)","Asterisk (*)","Hash (#)"],"B","A C# destructor is prefixed with a tilde."],
+["Which keyword is used in a base class method declaration to indicate that it can be overridden in derived classes?",["override","virtual","abstract","new"],"B","The virtual keyword allows derived classes to override a method."],
+["What is a primary feature of an abstract class in C#?",["It can be directly instantiated with the new keyword.","It cannot be instantiated and may contain abstract methods without bodies.","All of its methods must be sealed.","It cannot serve as a base class."],"B","Abstract classes cannot be instantiated and may declare abstract members."],
+["Which members CANNOT be contained inside an interface declaration?",["Properties","Methods","Fields (variables)","Indexers"],"C","Interfaces do not contain instance fields."],
+["What default access modifier applies to all members declared inside an interface?",["private","protected","public","internal"],"C","Interface members are public by default."],
+["What is a nested class?",["A class derived from an abstract interface","A class declared as a member inside another class","A static class that cannot contain static members","A class containing only destructors"],"B","A nested class is declared inside another class."],
+["Which pair of keywords is used to define and consume custom namespaces in C#?",["using and namespace","import and package","include and module","require and space"],"A","namespace declares a namespace and using references it."],
+["How many destructors can be defined for a single class in C#?",["Zero","Exactly one (1)","Unlimited","Up to two (2)"],"B","A class can have only one destructor."],
+["What limitation applies to static methods within a class?",["They cannot accept arguments.","They can only access static members.","They must return an integer value.","They cannot be called from Main()."],"B","Static methods cannot directly access instance members."],
+["When is a static constructor automatically called?",["Every time an object is instantiated","Once, when a static member of the class is accessed","When the program finishes execution","Whenever a destructor is invoked"],"B","The static constructor runs automatically once before static use."],
+["Which static method of the Math class returns a specified number raised to a specified power?",["Math.Sqrt()","Math.Pow()","Math.Abs()","Math.Round()"],"B","Math.Pow calculates a number raised to a power."],
+["Which method of the static Array class sorts array elements in ascending order?",["Array.Order()","Array.Sort()","Array.Reverse()","Array.Arrange()"],"B","Array.Sort sorts array elements."],
+["Which static property of the DateTime class returns the current date and time from the system clock?",["DateTime.Today","DateTime.Now","DateTime.Current","DateTime.SystemClock"],"B","DateTime.Now returns the current local date and time."],
+["What does the this keyword refer to inside a class implementation?",["The current instance/object of the class","The base parent class","The global namespace","The static entry point method"],"A","this refers to the current object instance."],
+["What is a key difference between readonly members and const members?",["readonly members can have values assigned or changed inside a constructor.","const members can be declared without initialized values.","const members can hold evaluation values.","readonly members are implicitly static by definition."],"A","readonly fields may be assigned in a constructor; const fields must be compile-time initialized."],
+["Which C# feature allows objects to be indexed in the same manner as array elements using square brackets []?",["Indexers","Auto-properties","Structs","Enumerations"],"A","Indexers provide bracket-based access to class objects."],
+["Overloaded operator methods must always be declared with which access modifier?",["private","static","virtual","abstract"],"B","Overloaded operators are declared static."],
+["Which keyword is used to declare value types that encapsulate small groups of related variables?",["class","struct","enum","interface"],"B","struct declares a value type."],
+["What constructor restriction applies specifically to struct declarations?",["Structs cannot contain constructors with parameters.","Structs cannot contain default parameterless constructors.","Struct constructors must be private.","Struct constructors must return a value."],"B","The stated restriction is that structs cannot contain default parameterless constructors."],
+["Which keyword is used to declare a specialized type containing a named list of integral constants?",["list","enum","struct","array"],"B","enum declares named integral constants."],
+["When an enum element's index value is manually assigned, what value is automatically assigned to the subsequent unassigned enum item?",["Zero","One increment above the previous element's value","Double the previous value","It results in a syntax error"],"B","The next unassigned enum member increments the previous value by one."],
+["In exception handling, which code block encloses statements that might throw or generate an exception?",["catch","try","finally","throw"],"B","Potentially failing statements belong in a try block."],
+["Which exception type is thrown when an invalid index is used to access an element of an array?",["FileNotFoundException","FormatException","IndexOutOfRangeException","InvalidOperationException"],"C","Invalid indexes throw IndexOutOfRangeException."],
+["What is the primary purpose of the optional finally block in exception handling?",["To execute code regardless of whether an exception was thrown or caught","To catch specific runtime arithmetic exceptions","To suppress all errors and prevent compilation","To restart program execution from Main()"],"A","finally runs whether or not an exception occurs."],
+["Which method of the System.IO.File class creates a file and writes content to it, overwriting it if it already exists?",["File.AppendAllText()","File.WriteAllText()","File.ReadAllText()","File.Copy()"],"B","File.WriteAllText creates or overwrites a text file."],
+["Which File class method returns a Boolean value indicating whether a file exists at a specified path?",["File.HasFile()","File.Exists()","File.Check()","File.Open()"],"B","File.Exists returns true when the path exists."],
+["Which method of the System.IO.File class relocates a file from a specified location to a new target directory or location?",["File.Copy()","File.Move()","File.Transfer()","File.Replace()"],"B","File.Move relocates a file."]
+];
+
+const mathQuestions = [
+  ["Which jQuery method is used to add one or more classes to the selected elements?",["setClass()","addClass()","appendClass()","toggleClass()"],"B","addClass() adds one or more classes."],
+  ["How are multiple class names separated when using the addClass() method?",["With commas","With semicolons","With whitespace","With plus signs"],"C","Multiple class names are separated by whitespace."],
+  ["What happens when toggleClass() is executed on an element that already has the specified class?",["The class is added again.","The class is removed.","An error is thrown.","Nothing changes."],"B","toggleClass() removes the class when it is already present."],
+  ["Which jQuery method can be used to both get and set CSS property values?",["css()","style()","attr()","html()"],"A","css() gets and sets CSS properties."],
+  ["When setting multiple CSS properties with css(), which syntax format is used?",["XML syntax","JSON syntax","YAML syntax","HTML attribute syntax"],"B","Multiple CSS properties are supplied as an object in JSON-like syntax."],
+  ["Property-value pairs in the css() method are enclosed in which type of brackets?",["Square brackets []","Angle brackets <>","Parentheses ()","Curly braces {}"],"D","CSS property-value pairs are enclosed in curly braces."],
+  ["Which method returns the width of an element excluding padding, borders, and margins?",["innerWidth()","outerWidth()","width()","css(\"width\")"],"C","width() returns content width."],
+  ["The innerWidth() method includes which of the following element dimensions?",["Content width only","Content width and padding ONLY","Content width, padding, and border","Content width, padding, border, and margin"],"B","innerWidth() includes content and padding."],
+  ["Which dimension method calculates size including both padding and borders?",["height()","innerHeight()","outerHeight()","marginHeight()"],"C","outerHeight() includes padding and borders."],
+  ["Numerical dimension values in jQuery are converted and treated as equivalent measurements in what unit?",["Inches","Percentages","Em units","Pixels"],"D","jQuery treats numerical dimensions as pixels."],
+  ["DOM traversal in jQuery is designed to simplify processes compared to native JavaScript by requiring:",["More code","Less code","Complex loops","Raw XML parsing"],"B","jQuery traversal generally requires less code."],
+  ["Which jQuery traversal method returns the direct parent element of the selected element?",["parents()","parent()","children()","ancestor()"],"B","parent() returns the direct parent."],
+  ["What does the parents() method return?",["Only the top-most root element","The direct parent element","All ancestor elements of the selected element","All child elements of the parent"],"C","parents() returns all ancestors."],
+  ["Which method returns all direct children of the selected element?",["children()","siblings()","descendants()","find()"],"A","children() returns direct children."],
+  ["To select all sibling elements of a target element, which method is used?",["next()","prev()","siblings()","eq()"],"C","siblings() selects sibling elements."],
+  ["What is returned by the next() method?",["The next child element","The next sibling element","All ancestor elements","The direct parent element"],"B","next() returns the next sibling."],
+  ["Which method retrieves previous sibling elements in the DOM hierarchy?",["prev() / prevAll()","parent()","children()","back()"],"A","prev() and prevAll() retrieve previous siblings."],
+  ["The eq() method selects an element based on its:",["ID name","Class name","Specific index number","Tag name"],"C","eq() selects by index."],
+  ["What is the index number of the first element in a set selected by eq()?",["-1","0","1","2"],"B","jQuery indexes start at zero."],
+  ["Which method is used to completely remove elements from the DOM?",["empty()","remove()","detachClass()","hide()"],"B","remove() deletes selected elements."],
+  ["What does the empty() method remove from a selected element?",["The selected element itself","Only the attributes of the element","Any child elements of the selected element","The element's CSS classes"],"C","empty() removes child elements."],
+  ["When empty() is used on a parent element, what happens to the parent element itself?",["It is completely deleted.","It is retained, but its children are removed.","It is converted into a span tag.","It gets hidden using display: none."],"B","The parent remains while its children are removed."],
+  ["Which event fires when an element is clicked twice in rapid succession?",["click()","dblclick()","mouseenter()","hover()"],"B","dblclick() handles double-clicks."],
+  ["Which event handler occurs when the mouse pointer moves over (enters) an element's area?",["mouseleave()","mouseout()","mouseenter()","focus()"],"C","mouseenter() fires when the pointer enters."],
+  ["What event is triggered when the mouse pointer leaves a selected element?",["mouseenter()","mouseleave()","blur()","change()"],"B","mouseleave() fires when the pointer leaves."],
+  ["Which keyboard event triggers at the moment a key is pressed down?",["keyup()","keypress()","keydown()","input()"],"C","keydown() fires when a key is pressed."],
+  ["Which event handler function is triggered when a key is released?",["keydown()","keyup()","blur()","change()"],"B","keyup() fires when a key is released."],
+  ["What event handler is used to run code when a form is submitted?",["submit()","send()","post()","change()"],"A","submit() handles form submission."],
+  ["The change() event occurs when:",["An element loses focus","The value of an element has been changed","The mouse pointer moves","The window is resized"],"B","change() fires when an element's value changes."],
+  ["Which event handler is executed when an element receives focus?",["blur()","focus()","ready()","active()"],"B","focus() fires when an element receives focus."],
+  ["The blur() event handler occurs when an element:",["Gets focus","Loses focus","Is hidden","Is clicked"],"B","blur() fires when an element loses focus."],
+  ["Which event handler is executed as soon as the DOM hierarchy has been fully loaded?",["load()","ready()","resize()","scroll()"],"B","ready() runs after the DOM is ready."],
+  ["Which event fires when the user resizes the browser window?",["scroll()","resize()","change()","scale()"],"B","resize() fires when the window changes size."],
+  ["What method offers an alternative technique to attach event handlers to selected elements?",["bind()","attach()","on()","listen()"],"C","on() attaches event handlers."],
+  ["When using the on() method, what is passed as the first argument?",["The event handling function","The actual event listening method (e.g., \"click\")","The CSS selector","The target DOM element"],"B","The first argument is the event type."],
+  ["Which method is used to detach or remove an event handler attached with on()?",["off()","unbind()","detach()","remove()"],"A","off() removes handlers attached with on()."],
+  ["Event handling functions receive an object that contains event-related properties and methods. What is this object called?",["DOM Object","Action Object","Event Object","Response Object"],"C","The object is called the Event Object."],
+  ["Which properties of the Event Object return the mouse X & Y coordinates at the time of the event?",["clientX and clientY","pageX and pageY","screenX and screenY","posX and posY"],"B","pageX and pageY provide page coordinates."],
+  ["The type property of an Event Object returns:",["The HTML tag name","The data type of the target element","The name/type of the event (e.g., \"click\")","The class name of the element"],"C","type returns the event name."],
+  ["In keyboard events, which property returns the key or button that was pressed?",["key","code","which","keyCode"],"C","which returns the key/button value in the referenced jQuery event API."],
+  ["Which property returns any custom data passed in when the event was bound?",["target","data","value","info"],"B","data contains custom event data."],
+  ["The target property of an Event Object returns:",["The DOM element that initiated the event","The parent element of the active element","The event listener function","The return value of the function"],"A","target identifies the element that initiated the event."],
+  ["Which method prevents default actions (such as a link following a URL)?",["stopPropagation()","cancelBubble()","preventDefault()","stop()"],"C","preventDefault() cancels the browser's default action."],
+  ["What does stopPropagation() do?",["Stops the script execution completely","Prevents event bubbling to ancestor elements","Prevents forms from submitting","Pauses CSS animations"],"B","stopPropagation() prevents bubbling."],
+  ["Which jQuery method allows executing event handling functions manually without physical user interaction?",["fire()","trigger()","dispatch()","emit()"],"B","trigger() manually fires an event."],
+  ["What is a limitation of the trigger() method?",["It cannot handle custom events.","It cannot mimic native browser events like clicking anchor tags.","It works only on form elements.","It requires an internet connection."],"B","trigger() cannot fully mimic native browser actions such as anchor clicks."],
+  ["Which method is used to hide selected elements?",["show()","hide()","toggle()","remove()"],"B","hide() hides selected elements."],
+  ["Which method alternates between revealing and hiding elements?",["slide()","fade()","toggle()","switch()"],"C","toggle() alternates visibility."],
+  ["What does the fadeIn() method do?",["Makes an element completely invisible instantly","Gradually fades an element until it is visible","Fades an element up to a fixed 50% opacity","Slides the element down"],"B","fadeIn() gradually makes an element visible."],
+  ["Which fading method accepts floating-point values between 0 and 1 to set custom opacity?",["fadeIn()","fadeOut()","fadeToggle()","fadeTo()"],"D","fadeTo() accepts a target opacity."],
+  ["In fadeTo(), what floating-point value represents an opacity level of 60%?",["60","6.0","0.6","0.06"],"C","Sixty percent opacity is 0.6."],
+  ["Speed arguments in fading and sliding methods take numerical values measured in:",["Seconds","Milliseconds","Frames per second","Minutes"],"B","jQuery animation speeds are measured in milliseconds."],
+  ["Which sliding method creates an upward effect to hide an element?",["slideDown()","slideUp()","slideToggle()","slideOut()"],"B","slideUp() hides an element with an upward effect."],
+  ["What effect is produced by slideDown()?",["Downward sliding effect to show an element","Downward sliding effect to hide an element","Fading out effect","Horizontal expansion"],"A","slideDown() reveals an element by sliding it downward."],
+  ["Which method allows custom animation to set values or values relative to current values?",["animate()","css()","transform()","transition()"],"A","animate() creates custom animations."],
+  ["How are multiple CSS properties separated inside the animate() method's first parameter?",["Semicolons","Colons","Commas","Spaces"],"C","Properties in the object are separated by commas."],
+  ["Relative values in animate() can be specified using which operators?",["++ or --","+= or -=","== or !=","*= or /="],"B","Relative animation values use += or -=."],
+  ["According to the rules of animate(), CSS property names with multiple words must be written in:",["kebab-case","SNAKE_CASE","camelCase","PascalCase"],"C","Multiword property names use camelCase."],
+  ["When using animate(), how should the CSS property margin-right be formatted?",["margin-right","margin_right","marginRight","MarginRight"],"C","margin-right becomes marginRight in JavaScript."],
+  ["How does jQuery handle sequential calls to the animate() method on the same element?",["It executes them all simultaneously.","It cancels earlier animations.","It creates an internal queue and executes them sequentially.","It throws a syntax error."],"C","jQuery queues animations on the same element."]
+];
+
+function escapeHTML(value){
+  return String(value).replace(/[&<>"']/g,character=>(
+    {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[character])
+  );
+}
+
+function renderMCQ(){
+  const c=document.getElementById("mcqContainer");
+  c.innerHTML=questions.map((q,i)=>{
+    const n=i+1;
+    return `<div class="question">
+      <div class="qtext">${n}. ${escapeHTML(q[0])}</div>
+      ${q[1].map((opt,j)=>{
+        const letter=String.fromCharCode(65+j);
+        return `<label class="option"><input type="radio" name="q${n}" value="${letter}"${j===0?" required":""}> <strong>${letter}.</strong> ${escapeHTML(opt)}</label>`;
+      }).join("")}
+    </div>`;
+  }).join("");
+}
+function renderMathQuestions(){
+  const c=document.getElementById("mathMcqContainer");
+  c.innerHTML=mathQuestions.map((q,i)=>{
+    const n=i+1;
+    return `<div class="question">
+      <div class="qtext">${n}. ${escapeHTML(q[0])}</div>
+      ${q[1].map((opt,j)=>{
+        const letter=String.fromCharCode(65+j);
+        return `<label class="option"><input type="radio" name="m${n}" value="${letter}"${j===0?" required":""}> <strong>${letter}.</strong> ${escapeHTML(opt)}</label>`;
+      }).join("")}
+    </div>`;
+  }).join("");
+}
+function shuffleQuestions(){
+  for(let i=questions.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [questions[i],questions[j]]=[questions[j],questions[i]];
+  }
+}
+function shuffleMathQuestions(){
+  for(let i=mathQuestions.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [mathQuestions[i],mathQuestions[j]]=[mathQuestions[j],mathQuestions[i]];
+  }
+}
+async function grade(){
+  document.getElementById("submissionLoading").style.display="grid";
+  document.body.style.overflow="hidden";
+  let correct=0, answered=0, review=[];
+  questions.forEach((q,i)=>{
+    const selected=document.querySelector(`input[name="q${i+1}"]:checked`);
+    document.querySelectorAll(`input[name="q${i+1}"]`).forEach(input=>{
+      const option=input.closest(".option");
+      option.classList.toggle("answer-correct",input.value===q[2]);
+      option.classList.toggle("answer-wrong",Boolean(selected)&&input===selected&&input.value!==q[2]);
+    });
+    if(selected){
+      answered++;
+      if(selected.value===q[2]) correct++;
+      else review.push({n:i+1,selected:selected.value,correct:q[2]});
+    }
+  });
+  const points=correct*2;
+  let saveMessage="";
+  if(SUPABASE_KEY==="******"){
+    saveMessage="The examination was graded, but it could not be saved because the Supabase API key is not configured.";
+    console.error(saveMessage);
+  }else{
+    const { error } = await supabaseClient
+      .from("exam_submissions")
+      .insert({
+        student_name: document.getElementById("name").value.trim(),
+        section: document.getElementById("section").value.trim(),
+        exam_date: document.getElementById("date").value,
+        mcq_score: points,
+        essay_answered: 0
+      });
+
+    if (error) {
+      saveMessage="The examination was graded, but it could not be saved. Please contact your instructor.";
+      console.error("Could not save exam result:", error);
+    }
+  }
+if (!saveMessage) {
+  const submitButton=document.getElementById("submitButton");
+  submitButton.type="button";
+  submitButton.textContent="Retake Examination";
+  submitButton.onclick=retakeExam;
+}
+  document.getElementById("submissionLoading").style.display="none";
+  document.getElementById("result").style.display="block";
+  document.getElementById("resultText").innerHTML=
+    `<div class="score">${points} / 120</div>
+     <p><strong>Multiple-choice:</strong> ${correct} correct out of 60. ${answered} item(s) answered.</p>
+     <p class="success">Your score is based on 60 multiple-choice items worth 2 points each.</p>
+     ${saveMessage?`<p class="warning"><strong>Save status:</strong> ${saveMessage}</p>`:"<p class=\"success\"><strong>Save status:</strong> Result saved successfully.</p>"}`;
+  document.getElementById("review").innerHTML = review.length
+    ? `<h3>Items to Review</h3>${review.map(x=>`<div class="wrong">Item ${x.n}: your answer <strong>${x.selected}</strong> • correct answer <strong>${x.correct}</strong><br>${questions[x.n-1][3]}</div>`).join("")}`
+    : `<div class="correct">Excellent! All answered items are correct.</div>`;
+  document.querySelector(".result-close").focus();
+}
+async function gradeMath(){
+  let correct=0, answered=0, review=[];
+  const form=document.getElementById("mathExamForm");
+  mathQuestions.forEach((q,i)=>{
+    const selected=form.querySelector(`input[name="m${i+1}"]:checked`);
+    form.querySelectorAll(`input[name="m${i+1}"]`).forEach(input=>{
+      const option=input.closest(".option");
+      option.classList.toggle("answer-correct",input.value===q[2]);
+      option.classList.toggle("answer-wrong",Boolean(selected)&&input===selected&&input.value!==q[2]);
+    });
+    if(selected){
+      answered++;
+      if(selected.value===q[2]) correct++;
+      else review.push({n:i+1,selected:selected.value,correct:q[2]});
+    }
+  });
+  const points=correct*2;
+  let saveMessage="";
+  if(SUPABASE_KEY==="******"){
+    saveMessage="The examination was graded, but it could not be saved because the Supabase API key is not configured.";
+    console.error(saveMessage);
+  }else{
+    const { error } = await supabaseClient
+      .from("exam_submissions")
+      .insert({
+        student_name: document.getElementById("mathName").value.trim(),
+        section: document.getElementById("mathSection").value.trim(),
+        exam_date: document.getElementById("mathDate").value,
+        mcq_score: points,
+        essay_answered: 0
+      });
+
+    if(error){
+      saveMessage="The examination was graded, but it could not be saved. Please contact your instructor.";
+      console.error("Could not save JavaScript exam result:",error);
+    }
+  }
+  if(!saveMessage){
+    const submitButton=document.getElementById("mathSubmitButton");
+    submitButton.type="button";
+    submitButton.textContent="Retake Examination";
+    submitButton.onclick=retakeExam;
+  }
+  const result=document.getElementById("mathResult");
+  const resultText=document.getElementById("mathResultText");
+  const reviewBox=document.getElementById("mathReview");
+  result.style.display="block";
+  resultText.innerHTML=`<div class="score">${points} / 120</div>
+    <p><strong>Multiple-choice:</strong> ${correct} correct out of 60. ${answered} item(s) answered.</p>
+    <p class="success">Your score is based on 60 multiple-choice items worth 2 points each.</p>`;
+  resultText.innerHTML+=saveMessage
+    ? `<p class="warning"><strong>Save status:</strong> ${saveMessage}</p>`
+    : `<p class="success"><strong>Save status:</strong> Result saved successfully.</p>`;
+  reviewBox.innerHTML = review.length
+    ? `<h3>Items to Review</h3>${review.map(x=>`<div class="wrong">Item ${x.n}: your answer <strong>${x.selected}</strong> • correct answer <strong>${x.correct}</strong><br>${mathQuestions[x.n-1][3]}</div>`).join("")}`
+    : `<div class="correct">Excellent! All answered items are correct.</div>`;
+  result.querySelector(".result-close").focus();
+}
+document.getElementById("examForm").addEventListener("submit",e=>{e.preventDefault();grade();});
+document.getElementById("mathExamForm").addEventListener("submit",e=>{e.preventDefault();gradeMath();});
+function closeResult(targetId="result"){
+  document.getElementById(targetId).style.display="none";
+  document.body.style.overflow="";
+}
+function resetExam(){
+  if(confirm("Reset all answers?")){
+    document.getElementById("examForm").reset();
+    closeResult();
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+}
+function resetMathExam(){
+  if(confirm("Reset all answers?")){
+    document.getElementById("mathExamForm").reset();
+    closeResult("mathResult");
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+}
+function retakeExam(){
+  window.location.reload();
+}
+function switchTab(tabName){
+  const tabs=document.querySelectorAll(".tab-button");
+  const panels=document.querySelectorAll(".tab-panel");
+  tabs.forEach(button=>{
+    const isActive=button.dataset.tab===tabName;
+    button.classList.toggle("active",isActive);
+    button.setAttribute("aria-selected",String(isActive));
+  });
+  panels.forEach(panel=>{
+    const isActive=panel.id===`${tabName}-panel`;
+    panel.classList.toggle("active",isActive);
+    panel.hidden=!isActive;
+  });
+}
+document.querySelectorAll(".tab-button").forEach(button=>{
+  button.addEventListener("click",()=>switchTab(button.dataset.tab));
+});
+function prepareExam(){
+  shuffleQuestions();
+  shuffleMathQuestions();
+  renderMCQ();
+  renderMathQuestions();
+  document.getElementById("date").valueAsDate=new Date();
+  document.getElementById("mathDate").valueAsDate=new Date();
+  document.getElementById("loadingMessage").textContent="Your questions are ready. Good luck!";
+  const startButton=document.getElementById("startExam");
+  startButton.disabled=false;
+  startButton.textContent="Start Examination";
+  setTimeout(()=>{
+    document.getElementById("loadingScreen").style.display="none";
+    document.getElementById("welcomeScreen").style.display="grid";
+    startButton.focus();
+  },800);
+}
+async function enterFullscreen(){
+  if(!document.fullscreenElement){
+    await document.documentElement.requestFullscreen();
+  }
+}
+let examStarted=false;
+let pageLeaveRefreshStarted=false;
+function refreshAfterPageLeave(){
+  if(examStarted&&!pageLeaveRefreshStarted){
+    pageLeaveRefreshStarted=true;
+    window.location.reload();
+  }
+}
+function pauseForPageLeave(){
+  if(examStarted&&(document.hidden||!document.hasFocus())){
+    document.getElementById("pageLeaveScreen").style.display="grid";
+    document.body.style.overflow="hidden";
+  }
+}
+function resumeAfterPageReturn(){
+  if(examStarted&&document.visibilityState==="visible"&&document.hasFocus()&&document.fullscreenElement){
+    document.getElementById("pageLeaveScreen").style.display="none";
+    document.body.style.overflow="";
+  }
+}
+async function startExam(){
+  try{
+    await enterFullscreen();
+  }catch(error){
+    console.error("Fullscreen is required to start the examination:",error);
+    document.getElementById("loadingMessage").textContent="Fullscreen permission is required to start the examination.";
+    return;
+  }
+  document.getElementById("welcomeScreen").style.display="none";
+  document.getElementById("fullscreenScreen").style.display="none";
+  document.body.style.overflow="";
+  examStarted=true;
+  document.getElementById("name").focus();
+}
+document.getElementById("startExam").addEventListener("click",startExam);
+document.getElementById("returnFullscreen").addEventListener("click",startExam);
+document.getElementById("returnPage").addEventListener("click",startExam);
+document.addEventListener("fullscreenchange",()=>{
+  if(examStarted&&!document.fullscreenElement){
+    document.getElementById("fullscreenScreen").style.display="grid";
+    document.body.style.overflow="hidden";
+    document.getElementById("returnFullscreen").focus();
+  }
+  resumeAfterPageReturn();
+});
+document.addEventListener("visibilitychange",pauseForPageLeave);
+window.addEventListener("blur",pauseForPageLeave);
+window.addEventListener("focus",resumeAfterPageReturn);
+document.addEventListener("visibilitychange",()=>{
+  if(document.hidden) refreshAfterPageLeave();
+});
+window.addEventListener("blur",refreshAfterPageLeave);
+document.body.style.overflow="hidden";
+window.addEventListener("load",prepareExam,{once:true});
+</script>
+</body>
+</html>
