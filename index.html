@@ -567,25 +567,33 @@ async function gradeMath(){
     }
   });
   const points=correct*2;
+  const submissionLoading=document.getElementById("submissionLoading");
+  submissionLoading.style.display="grid";
+  document.body.style.overflow="hidden";
   let saveMessage="";
-  if(SUPABASE_KEY==="******"){
-    saveMessage="The examination was graded, but it could not be saved because the Supabase API key is not configured.";
-    console.error(saveMessage);
-  }else{
-    const { error } = await supabaseClient
-      .from("exam_submissions")
-      .insert({
-        student_name: document.getElementById("mathName").value.trim(),
-        section: document.getElementById("mathSection").value.trim(),
-        exam_date: document.getElementById("mathDate").value,
-        mcq_score: points,
-        essay_answered: 0
-      });
+  try{
+    if(SUPABASE_KEY==="******"){
+      saveMessage="The examination was graded, but it could not be saved because the Supabase API key is not configured.";
+      console.error(saveMessage);
+    }else{
+      const { error } = await supabaseClient
+        .from("exam_submissions")
+        .insert({
+          student_name: document.getElementById("mathName").value.trim(),
+          section: document.getElementById("mathSection").value.trim(),
+          exam_date: document.getElementById("mathDate").value,
+          mcq_score: points,
+          essay_answered: 0
+        });
 
-    if(error){
-      saveMessage="The examination was graded, but it could not be saved. Please contact your instructor.";
-      console.error("Could not save JavaScript exam result:",error);
+      if(error){
+        saveMessage="The examination was graded, but it could not be saved. Please contact your instructor.";
+        console.error("Could not save JavaScript exam result:",error);
+      }
     }
+  }finally{
+    submissionLoading.style.display="none";
+    document.body.style.overflow="";
   }
   if(!saveMessage){
     const submitButton=document.getElementById("mathSubmitButton");
